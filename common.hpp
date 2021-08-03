@@ -26,9 +26,11 @@ template<typename T>
 struct ColumnOutput {
   using value_t = T;
   using page_t = io::DataColumn<T>;
+
+  uintptr_t output_size;
   std::vector<T> items;
 
-  ColumnOutput(unsigned expected_rows = 1024) {
+  ColumnOutput(unsigned expected_rows = 1024) : output_size(page_t::GLOBAL_OVERHEAD), items() {
     items.reserve(expected_rows);
   }
 
@@ -38,12 +40,21 @@ struct ColumnOutput {
 
   bool append(const T& val) {
     items.push_back(val);
+    if constexpr (page_t::size_tag::IS_VARIABLE) {
+      output_size += sizeof(T);
+    } else {
+      output_size += val.size() + page_t::PER_ITEM_OVERHEAD;
+    }
     return true;
   }
 
   page_t make_page(const char* filename) const {
-    // TODO
-    return page_t(filename, O_CREAT, items.size() * sizeof(T));
+    auto page = page_t(filename, O_CREAT, output_size);
+    auto idx = 0ul;
+    for (auto& item : items) {
+      auto success = page.put(item, idx);
+      assert(success);
+    }
   }
 };
 
@@ -57,9 +68,12 @@ struct TableReader {
   std::array<std::string, sizeof...(Ts)> output_files;
 
   TableReader(const std::string& output_prefix) {
-    for (auto i = 0u; i != sizeof...(Ts); ++i) {
-      output_files[i] = output_prefix + std::to_string(i) + ".bin";
-    }
+    fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num) {
+      using value_t = typename std::remove_reference<decltype(output)>::type::value_t;
+      using parser_t = io::csv::Parser<value_t>;
+      output_files[idx] = output_prefix + std::to_string(idx) + "." + parser_t::TYPE_NAME + ".bin";
+      return 0;
+    });
   }
 
   ~TableReader() {
