@@ -10,7 +10,6 @@ RELEASE_FLAGS = -O3
 
 %.out: clean
 ifeq ($(target),debug)
-	gdb ./tester
 	${COMPILER} $(patsubst %.out, %.cpp, $@) ${FLAGS} ${DEBUG_FLAGS} -o $@
 else
 	${COMPILER} $(patsubst %.out, %.cpp, $@) ${FLAGS} ${RELEASE_FLAGS} -o $@
