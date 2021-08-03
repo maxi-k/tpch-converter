@@ -41,20 +41,29 @@ struct ColumnOutput {
   bool append(const T& val) {
     items.push_back(val);
     if constexpr (page_t::size_tag::IS_VARIABLE) {
-      output_size += sizeof(T);
-    } else {
       output_size += val.size() + page_t::PER_ITEM_OVERHEAD;
+    } else {
+      output_size += sizeof(T);
     }
     return true;
   }
 
   page_t make_page(const char* filename) const {
     auto page = page_t(filename, O_CREAT, output_size);
-    auto idx = 0ul;
-    for (auto& item : items) {
-      auto success = page.put(item, idx);
-      assert(success);
+    if constexpr (page_t::size_tag::IS_VARIABLE) {
+      auto idx = 0ul;
+      auto offset = page.file_size;
+      char* data = reinterpret_cast<char*>(page.data());
+      for (auto& str : items) {
+        offset -= str.size();
+        std::copy(str.begin(), str.end(), data + offset);
+        page.slot_at(idx) = { str.size(), offset };
+        ++idx;
+      }
+    } else {
+      std::copy(items.begin(), items.end(), page.begin());
     }
+    return page;
   }
 };
 
