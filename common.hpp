@@ -35,7 +35,7 @@ struct ColumnOutput {
   }
 
   ~ColumnOutput() {
-    // std::size_t size = page->end() -
+
   }
 
   bool append(const T& val) {
@@ -57,9 +57,9 @@ struct ColumnOutput {
       for (auto& str : items) {
         offset -= str.size();
         std::copy(str.begin(), str.end(), data + offset);
-        page.slot_at(idx) = { str.size(), offset };
-        ++idx;
+        page.slot_at(idx++) = { str.size(), offset };
       }
+      page.data()->count = idx;
     } else {
       std::copy(items.begin(), items.end(), page.begin());
     }
@@ -74,9 +74,12 @@ struct TableReader {
   using outputs_t = std::tuple<ColumnOutput<Ts>...>;
 
   outputs_t outputs;
+  io::MMapping<char> input;
   std::array<std::string, sizeof...(Ts)> output_files;
 
-  TableReader(const std::string& output_prefix) {
+  TableReader(const std::string& output_prefix, const char* filename)
+    : outputs()
+    , input(filename) {
     fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num) {
       using value_t = typename std::remove_reference<decltype(output)>::type::value_t;
       using parser_t = io::csv::Parser<value_t>;
@@ -89,17 +92,20 @@ struct TableReader {
     fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num) {
       auto page = output.make_page(output_files[idx].c_str());
       page.flush();
+      // for (auto item : page) {
+      //   std::cout << "idx " << idx << " item " << item << std::endl;
+      // }
       return 0;
     });
   }
 
-  unsigned read(const char* filename) {
+  unsigned read() {
     std::vector<unsigned> columns(sizeof...(Ts));
     for (auto i = 0u; i != sizeof...(Ts); ++i) {
       columns[i] = i;
     }
 
-    unsigned rows = io::csv::read_file<delim>(filename, columns, [&](unsigned col, CharIter& pos) {
+    unsigned rows = io::csv::read_file<delim>(input, columns, [&](unsigned col, CharIter& pos) {
       fold_outputs(0, [&](auto& output, unsigned idx, unsigned num) {
         if (idx == col) {
           using value_t = typename std::remove_reference<decltype(output)>::type::value_t;
@@ -110,6 +116,7 @@ struct TableReader {
         return 0;
       });
     });
+
     return rows;
   }
 

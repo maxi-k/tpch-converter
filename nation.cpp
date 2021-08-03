@@ -31,8 +31,8 @@ using CharIter = io::csv::CharIter;
 
 int main(int argc, char *argv[]) {
     auto cfg = read_config();
-    TableReader<unsigned, std::string_view, unsigned, std::string_view> nation_reader("output/");
-    auto rows = nation_reader.read(cfg.input.c_str());
+    TableReader<unsigned, std::string_view, unsigned, std::string_view> nation_reader("output/", cfg.input.c_str());
+    auto rows = nation_reader.read();
     // io::csv::read_file<'|', '\n', decltype(consume_cell)>(cfg.input.c_str(), nation_cols, consume_cell);
     std::cout << "read " << rows << "rows" << std::endl;
     return 0;
