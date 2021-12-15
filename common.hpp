@@ -6,6 +6,7 @@
 #include <vector>
 #include <array>
 #include <utility>
+#include <filesystem>
 #include "csv-read/csv.hpp"
 #include "csv-read/util.hpp"
 
@@ -80,6 +81,7 @@ struct TableReader {
   TableReader(const std::string& output_prefix, const char* filename)
     : outputs()
     , input(filename) {
+    std::filesystem::create_directories(output_prefix);
     fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num) {
       using value_t = typename std::remove_reference<decltype(output)>::type::value_t;
       using parser_t = io::csv::Parser<value_t>;
