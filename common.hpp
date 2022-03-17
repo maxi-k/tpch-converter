@@ -68,40 +68,22 @@ struct ColumnOutput {
   }
 };
 
-template<typename... Ts>
-struct TableReader {
+template <typename... Ts>
+struct TableImport {
 
   using tuple_type = std::tuple<Ts...>;
   using outputs_t = std::tuple<ColumnOutput<Ts>...>;
 
   outputs_t outputs;
   io::MMapping<char> input;
-  std::array<std::string, sizeof...(Ts)> output_files;
 
-  TableReader(const std::string& output_prefix, const char* filename)
-    : outputs()
-    , input(filename) {
-    std::filesystem::create_directories(output_prefix);
-    fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num) {
-      using value_t = typename std::remove_reference<decltype(output)>::type::value_t;
-      using parser_t = io::csv::Parser<value_t>;
-      output_files[idx] = output_prefix + std::to_string(idx) + "." + parser_t::TYPE_NAME + ".bin";
-      return 0;
-    });
-  }
+  TableImport(const char *filename)
+      : outputs()
+      , input(filename) {}
 
-  ~TableReader() {
-    fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num) {
-      auto page = output.make_page(output_files[idx].c_str());
-      page.flush();
-      // for (auto item : page) {
-      //   std::cout << "idx " << idx << " item " << item << std::endl;
-      // }
-      return 0;
-    });
-  }
+  ~TableImport() {}
 
-  unsigned read() {
+  inline unsigned read() {
     std::vector<unsigned> columns(sizeof...(Ts));
     for (auto i = 0u; i != sizeof...(Ts); ++i) {
       columns[i] = i;
@@ -121,6 +103,7 @@ struct TableReader {
 
     return rows;
   }
+  inline unsigned operator()() { return read(); }
 
   template <typename T, typename F, unsigned I = 0>
   constexpr inline T fold_outputs(T init_value, const F &fn) {
@@ -130,6 +113,34 @@ struct TableReader {
       return fold_outputs<T, F, I + 1>(fn(std::get<I>(outputs), I, sizeof...(Ts)), fn);
     }
   }
+};  // struct TableImport
 
+template <typename... Ts>
+struct TableReader : TableImport<Ts...> {
+  using super_t = TableImport<Ts...>;
+  std::array<std::string, sizeof...(Ts)> output_files;
+
+  TableReader(const std::string& output_prefix, const char* filename)
+    : super_t(filename) {
+    // initialize output files
+    std::filesystem::create_directories(output_prefix);
+    this->fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num) {
+      using value_t = typename std::remove_reference<decltype(output)>::type::value_t;
+      using parser_t = io::csv::Parser<value_t>;
+      output_files[idx] = output_prefix + std::to_string(idx) + "." + parser_t::TYPE_NAME + ".bin";
+      return 0;
+    });
+  }
+
+  ~TableReader() {
+    // write to files
+    this->fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num) {
+      auto page = output.make_page(output_files[idx].c_str());
+      page.flush();
+      // for (auto item : page) {
+      //   std::cout << "idx " << idx << " item " << item << std::endl;
+      // }
+      return 0;
+    });
+  }
 }; // struct TableReader
-
