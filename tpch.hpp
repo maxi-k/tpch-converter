@@ -5,7 +5,7 @@
 namespace tpch {
 
     template<typename... Ts>
-    struct _TypeGen {
+    struct TableDef {
         using import = TableImport<Ts...>;
         using reader = TableReader<Ts...>;
     };
@@ -18,7 +18,7 @@ namespace tpch {
      *  N_COMMENT    VARCHAR(152)
      * );
      **/
-    using nation = _TypeGen<unsigned, std::string_view, unsigned, std::string_view>;
+    using nation = TableDef<int, std::string_view, int, std::string_view>;
 
     /**
      * CREATE TABLE CUSTOMER (
@@ -32,7 +32,7 @@ namespace tpch {
      *  C_COMMENT     VARCHAR(117) NOT NULL
      * );
      **/
-    using customer = _TypeGen<unsigned, std::string_view, std::string_view, unsigned, std::string_view, double, std::string_view, std::string_view>;
+    using customer = TableDef<int, std::string_view, std::string_view, int, std::string_view, double, std::string_view, std::string_view>;
 
     /**
      * CREATE TABLE LINEITEM (
@@ -54,7 +54,7 @@ namespace tpch {
      *  L_COMMENT      VARCHAR(44) NOT NULL
      * );
      **/
-    using lineitem = _TypeGen<unsigned, unsigned, unsigned, unsigned, unsigned, double, double, double, char, char, std::string_view, std::string_view, std::string_view, std::string_view, std::string_view, std::string_view>;
+    using lineitem = TableDef<int, int, int, int, int, double, double, double, char, char, std::string_view, std::string_view, std::string_view, std::string_view, std::string_view, std::string_view>;
 
     /**
      * CREATE TABLE ORDERS (
@@ -69,7 +69,7 @@ namespace tpch {
      *  O_COMMENT        VARCHAR(79) NOT NULL
      * );
      **/
-    using orders = _TypeGen<unsigned, unsigned, char, double, std::string_view, std::string_view, std::string_view, unsigned, std::string_view>;
+    using orders = TableDef<int, int, char, double, std::string_view, std::string_view, std::string_view, int, std::string_view>;
 
     /**
      *  CREATE TABLE PART (
@@ -84,7 +84,7 @@ namespace tpch {
      *   P_COMMENT     VARCHAR(23) NOT NULL
      * );
      **/
-    using part = _TypeGen<unsigned, std::string_view, std::string_view, std::string_view, std::string_view, unsigned, std::string_view, double, std::string_view>;
+    using part = TableDef<int, std::string_view, std::string_view, std::string_view, std::string_view, int, std::string_view, double, std::string_view>;
 
     /**
      * CREATE TABLE PARTSUPP (
@@ -95,7 +95,7 @@ namespace tpch {
      *  PS_COMMENT     VARCHAR(199) NOT NULL
      * );
      **/
-    using partsupp = _TypeGen<unsigned, unsigned, unsigned, double, std::string_view>;
+    using partsupp = TableDef<int, int, int, double, std::string_view>;
 
     /**
      * CREATE TABLE REGION (
@@ -104,7 +104,7 @@ namespace tpch {
      *   R_COMMENT    VARCHAR(152)
      * );
      **/
-    using region = _TypeGen<unsigned, std::string_view, std::string_view>;
+    using region = TableDef<int, std::string_view, std::string_view>;
 
     /**
      * CREATE TABLE SUPPLIER (
@@ -117,5 +117,5 @@ namespace tpch {
      *  S_COMMENT     VARCHAR(101) NOT NULL
      * );
      **/
-    using supplier = _TypeGen<unsigned, std::string_view, std::string_view, unsigned, std::string_view, double, std::string_view>;
+    using supplier = TableDef<int, std::string_view, std::string_view, int, std::string_view, double, std::string_view>;
 } // namespace tpch
