@@ -90,7 +90,7 @@ struct TableImport {
     }
 
     unsigned rows = io::csv::read_file<delim>(input, columns, [&](unsigned col, CharIter& pos) {
-      fold_outputs(0, [&](auto& output, unsigned idx, unsigned num) {
+      fold_outputs(0, [&](auto& output, unsigned idx, unsigned num, unsigned v) {
         if (idx == col) {
           using value_t = typename std::remove_reference<decltype(output)>::type::value_t;
           io::csv::Parser<value_t> parser;
@@ -105,12 +105,20 @@ struct TableImport {
   }
   inline unsigned operator()() { return read(); }
 
+  inline constexpr static unsigned column_count() {
+    return std::tuple_size_v<outputs_t>;
+  }
+
+  inline size_t row_count() {
+    return std::get<0>(outputs).items.size();
+  }
+
   template <typename T, typename F, unsigned I = 0>
   constexpr inline T fold_outputs(T init_value, const F &fn) {
     if constexpr (I == sizeof...(Ts)) {
       return init_value;
     } else {
-      return fold_outputs<T, F, I + 1>(fn(std::get<I>(outputs), I, sizeof...(Ts)), fn);
+      return fold_outputs<T, F, I + 1>(fn(std::get<I>(outputs), I, sizeof...(Ts), init_value), fn);
     }
   }
 };  // struct TableImport
@@ -124,7 +132,7 @@ struct TableReader : TableImport<Ts...> {
     : super_t(filename) {
     // initialize output files
     std::filesystem::create_directories(output_prefix);
-    this->fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num) {
+    this->fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num, unsigned v) {
       using value_t = typename std::remove_reference<decltype(output)>::type::value_t;
       using parser_t = io::csv::Parser<value_t>;
       output_files[idx] = output_prefix + std::to_string(idx) + "." + parser_t::TYPE_NAME + ".bin";
@@ -134,7 +142,7 @@ struct TableReader : TableImport<Ts...> {
 
   ~TableReader() {
     // write to files
-    this->fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num) {
+    this->fold_outputs(0, [&](const auto& output, unsigned idx, unsigned num, unsigned v) {
       auto page = output.make_page(output_files[idx].c_str());
       page.flush();
       // for (auto item : page) {

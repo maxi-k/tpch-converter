@@ -19,6 +19,7 @@ namespace tpch {
      * );
      **/
     using nation = TableDef<int, std::string_view, int, std::string_view>;
+    constexpr std::array nation_c {"n_nationkey", "n_name", "n_regionkey", "n_comment"};
 
     /**
      * CREATE TABLE CUSTOMER (
@@ -33,28 +34,30 @@ namespace tpch {
      * );
      **/
     using customer = TableDef<int, std::string_view, std::string_view, int, std::string_view, double, std::string_view, std::string_view>;
+    constexpr std::array customer_c {"c_custkey", "c_name", "c_address", "c_nationkey", "c_phone", "c_acctbal", "c_mktsegment", "c_comment"};
 
     /**
      * CREATE TABLE LINEITEM (
-     *  L_ORDERKEY    INTEGER NOT NULL,
-     *  L_PARTKEY     INTEGER NOT NULL,
-     *  L_SUPPKEY     INTEGER NOT NULL,
-     *  L_LINENUMBER  INTEGER NOT NULL,
-     *  L_QUANTITY    DECIMAL(15,2) NOT NULL,
+     *  L_ORDERKEY       INTEGER NOT NULL,
+     *  L_PARTKEY        INTEGER NOT NULL,
+     *  L_SUPPKEY        INTEGER NOT NULL,
+     *  L_LINENUMBER     INTEGER NOT NULL,
+     *  L_QUANTITY       DECIMAL(15,2) NOT NULL,
      *  L_EXTENDEDPRICE  DECIMAL(15,2) NOT NULL,
-     *  L_DISCOUNT    DECIMAL(15,2) NOT NULL,
-     *  L_TAX         DECIMAL(15,2) NOT NULL,
-     *  L_RETURNFLAG  CHAR(1) NOT NULL,
-     *  L_LINESTATUS  CHAR(1) NOT NULL,
-     *  L_SHIPDATE    DATE NOT NULL,
-     *  L_COMMITDATE  DATE NOT NULL,
-     *  L_RECEIPTDATE DATE NOT NULL,
-     *  L_SHIPINSTRUCT CHAR(25) NOT NULL,
-     *  L_SHIPMODE     CHAR(10) NOT NULL,
-     *  L_COMMENT      VARCHAR(44) NOT NULL
+     *  L_DISCOUNT       DECIMAL(15,2) NOT NULL,
+     *  L_TAX            DECIMAL(15,2) NOT NULL,
+     *  L_RETURNFLAG     CHAR(1) NOT NULL,
+     *  L_LINESTATUS     CHAR(1) NOT NULL,
+     *  L_SHIPDATE       DATE NOT NULL,
+     *  L_COMMITDATE     DATE NOT NULL,
+     *  L_RECEIPTDATE    DATE NOT NULL,
+     *  L_SHIPINSTRUCT   CHAR(25) NOT NULL,
+     *  L_SHIPMODE       CHAR(10) NOT NULL,
+     *  L_COMMENT        VARCHAR(44) NOT NULL
      * );
      **/
     using lineitem = TableDef<int, int, int, int, int, double, double, double, char, char, std::string_view, std::string_view, std::string_view, std::string_view, std::string_view, std::string_view>;
+    constexpr std::array lineitem_c {"l_orderkey", "l_partkey", "l_suppkey", "l_linenumber", "l_quantity", "l_extendedprice", "l_discount", "l_tax", "l_returnflag", "l_linestatus", "l_shipdate", "l_commitdate", "l_receiptdate", "l_shipinstruct", "l_shipmode", "l_comment"};
 
     /**
      * CREATE TABLE ORDERS (
@@ -70,6 +73,7 @@ namespace tpch {
      * );
      **/
     using orders = TableDef<int, int, char, double, std::string_view, std::string_view, std::string_view, int, std::string_view>;
+    constexpr std::array orders_c {"o_orderkey", "o_custkey", "o_orderstatus", "o_totalprice", "o_orderdate", "o_orderpriority", "o_clerk", "o_shippriority", "o_comment"};
 
     /**
      *  CREATE TABLE PART (
@@ -85,6 +89,7 @@ namespace tpch {
      * );
      **/
     using part = TableDef<int, std::string_view, std::string_view, std::string_view, std::string_view, int, std::string_view, double, std::string_view>;
+    constexpr std::array part_c { "p_partkey", "p_name", "p_mfgr", "p_brand", "p_type", "p_size", "p_container", "p_retailprice", "p_comment"};
 
     /**
      * CREATE TABLE PARTSUPP (
@@ -96,7 +101,7 @@ namespace tpch {
      * );
      **/
     using partsupp = TableDef<int, int, int, double, std::string_view>;
-
+    constexpr std::array partsupp_c { "ps_partkey", "ps_suppkey", "ps_availqty", "ps_supplycost", "ps_comment"};
     /**
      * CREATE TABLE REGION (
      *   R_REGIONKEY  INTEGER NOT NULL,
@@ -105,6 +110,7 @@ namespace tpch {
      * );
      **/
     using region = TableDef<int, std::string_view, std::string_view>;
+    constexpr std::array region_c {"r_regionkey", "r_name", "r_comment"};
 
     /**
      * CREATE TABLE SUPPLIER (
@@ -118,4 +124,5 @@ namespace tpch {
      * );
      **/
     using supplier = TableDef<int, std::string_view, std::string_view, int, std::string_view, double, std::string_view>;
+    constexpr std::array supplier_c {"s_suppkey", "s_name", "s_address", "s_nationkey", "s_phone", "s_acctbal", "s_comment"};
 } // namespace tpch
