@@ -1,8 +1,12 @@
 #pragma once
 #include <string_view>
+#include "types.hpp"
+#include "types-parse.hpp"
 #include "common.hpp"
 
 namespace tpch {
+    using namespace types;
+    using VarChar = std::string_view;
 
     template<typename... Ts>
     struct TableDef {
@@ -18,8 +22,8 @@ namespace tpch {
      *  N_COMMENT    VARCHAR(152)
      * );
      **/
-    using nation = TableDef<int, std::string_view, int, std::string_view>;
-    constexpr std::array nation_c {"n_nationkey", "n_name", "n_regionkey", "n_comment"};
+    using nation = TableDef<Integer, Char<25>, Integer, VarChar>;
+    [[maybe_unused]] constexpr std::array nation_c {"n_nationkey", "n_name", "n_regionkey", "n_comment"};
 
     /**
      * CREATE TABLE CUSTOMER (
@@ -33,8 +37,8 @@ namespace tpch {
      *  C_COMMENT     VARCHAR(117) NOT NULL
      * );
      **/
-    using customer = TableDef<int, std::string_view, std::string_view, int, std::string_view, double, std::string_view, std::string_view>;
-    constexpr std::array customer_c {"c_custkey", "c_name", "c_address", "c_nationkey", "c_phone", "c_acctbal", "c_mktsegment", "c_comment"};
+    using customer = TableDef<Integer, VarChar, VarChar, Integer, Char<15>, Numeric<15, 2>, Char<10>, VarChar>;
+    [[maybe_unused]] constexpr std::array customer_c {"c_custkey", "c_name", "c_address", "c_nationkey", "c_phone", "c_acctbal", "c_mktsegment", "c_comment"};
 
     /**
      * CREATE TABLE LINEITEM (
@@ -56,8 +60,8 @@ namespace tpch {
      *  L_COMMENT        VARCHAR(44) NOT NULL
      * );
      **/
-    using lineitem = TableDef<int, int, int, int, int, double, double, double, char, char, std::string_view, std::string_view, std::string_view, std::string_view, std::string_view, std::string_view>;
-    constexpr std::array lineitem_c {"l_orderkey", "l_partkey", "l_suppkey", "l_linenumber", "l_quantity", "l_extendedprice", "l_discount", "l_tax", "l_returnflag", "l_linestatus", "l_shipdate", "l_commitdate", "l_receiptdate", "l_shipinstruct", "l_shipmode", "l_comment"};
+    using lineitem = TableDef<Integer, Integer, Integer, Integer, Numeric<15, 2>, Numeric<15, 2>, Numeric<15, 2>, Numeric<15, 2>, Char<1>, Char<1>, Date, Date, Date, Char<25>, Char<10>, VarChar>;
+    [[maybe_unused]] constexpr std::array lineitem_c {"l_orderkey", "l_partkey", "l_suppkey", "l_linenumber", "l_quantity", "l_extendedprice", "l_discount", "l_tax", "l_returnflag", "l_linestatus", "l_shipdate", "l_commitdate", "l_receiptdate", "l_shipinstruct", "l_shipmode", "l_comment"};
 
     /**
      * CREATE TABLE ORDERS (
@@ -72,8 +76,8 @@ namespace tpch {
      *  O_COMMENT        VARCHAR(79) NOT NULL
      * );
      **/
-    using orders = TableDef<int, int, char, double, std::string_view, std::string_view, std::string_view, int, std::string_view>;
-    constexpr std::array orders_c {"o_orderkey", "o_custkey", "o_orderstatus", "o_totalprice", "o_orderdate", "o_orderpriority", "o_clerk", "o_shippriority", "o_comment"};
+    using orders = TableDef<Integer, Integer, Char<1>, Numeric<15, 2>, Date, Char<15>, Char<15>, Integer, VarChar>;
+    [[maybe_unused]] constexpr std::array orders_c {"o_orderkey", "o_custkey", "o_orderstatus", "o_totalprice", "o_orderdate", "o_orderpriority", "o_clerk", "o_shippriority", "o_comment"};
 
     /**
      *  CREATE TABLE PART (
@@ -88,8 +92,8 @@ namespace tpch {
      *   P_COMMENT     VARCHAR(23) NOT NULL
      * );
      **/
-    using part = TableDef<int, std::string_view, std::string_view, std::string_view, std::string_view, int, std::string_view, double, std::string_view>;
-    constexpr std::array part_c { "p_partkey", "p_name", "p_mfgr", "p_brand", "p_type", "p_size", "p_container", "p_retailprice", "p_comment"};
+    using part = TableDef<Integer, VarChar, Char<25>, Char<10>, VarChar, Integer, Char<10>, Numeric<15, 2>, VarChar>;
+    [[maybe_unused]] constexpr std::array part_c { "p_partkey", "p_name", "p_mfgr", "p_brand", "p_type", "p_size", "p_container", "p_retailprice", "p_comment"};
 
     /**
      * CREATE TABLE PARTSUPP (
@@ -100,8 +104,8 @@ namespace tpch {
      *  PS_COMMENT     VARCHAR(199) NOT NULL
      * );
      **/
-    using partsupp = TableDef<int, int, int, double, std::string_view>;
-    constexpr std::array partsupp_c { "ps_partkey", "ps_suppkey", "ps_availqty", "ps_supplycost", "ps_comment"};
+    using partsupp = TableDef<Integer, Integer, Integer, Numeric<15, 2>, VarChar>;
+    [[maybe_unused]] constexpr std::array partsupp_c { "ps_partkey", "ps_suppkey", "ps_availqty", "ps_supplycost", "ps_comment"};
     /**
      * CREATE TABLE REGION (
      *   R_REGIONKEY  INTEGER NOT NULL,
@@ -109,8 +113,8 @@ namespace tpch {
      *   R_COMMENT    VARCHAR(152)
      * );
      **/
-    using region = TableDef<int, std::string_view, std::string_view>;
-    constexpr std::array region_c {"r_regionkey", "r_name", "r_comment"};
+    using region = TableDef<Integer, Char<25>, VarChar>;
+    [[maybe_unused]] constexpr std::array region_c {"r_regionkey", "r_name", "r_comment"};
 
     /**
      * CREATE TABLE SUPPLIER (
@@ -123,6 +127,6 @@ namespace tpch {
      *  S_COMMENT     VARCHAR(101) NOT NULL
      * );
      **/
-    using supplier = TableDef<int, std::string_view, std::string_view, int, std::string_view, double, std::string_view>;
-    constexpr std::array supplier_c {"s_suppkey", "s_name", "s_address", "s_nationkey", "s_phone", "s_acctbal", "s_comment"};
+    using supplier = TableDef<Integer, Char<25>, VarChar, Integer, Char<15>, Numeric<15, 2>, VarChar>;
+    [[maybe_unused]] constexpr std::array supplier_c {"s_suppkey", "s_name", "s_address", "s_nationkey", "s_phone", "s_acctbal", "s_comment"};
 } // namespace tpch

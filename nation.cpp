@@ -1,5 +1,6 @@
 #include "csv-read/csv.hpp"
 #include "common.hpp"
+#include "tpch.hpp"
 
 #include <iostream>
 #include <string_view>
@@ -31,9 +32,8 @@ using CharIter = io::csv::CharIter;
 
 int main(int argc, char *argv[]) {
     auto cfg = read_config();
-    TableReader<unsigned, std::string_view, unsigned, std::string_view> nation_reader("output/", cfg.input.c_str());
-    auto rows = nation_reader.read();
-    // io::csv::read_file<'|', '\n', decltype(consume_cell)>(cfg.input.c_str(), nation_cols, consume_cell);
-    std::cout << "read " << rows << "rows" << std::endl;
+    tpch::nation::reader reader("output/nation/", (cfg.input + "nation.tbl").c_str());
+    auto rows = reader.read();
+    std::cout << "read " << rows << " rows for nation" << std::endl;
     return 0;
 }
