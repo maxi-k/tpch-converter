@@ -7,6 +7,9 @@
 #include <tuple>
 #include <atomic>
 #include <ostream>
+#ifdef __SSE4_2__
+#include <nmmintrin.h>
+#endif
 //---------------------------------------------------------------------------
 // HyPer
 // (c) Thomas Neumann 2010
@@ -902,18 +905,18 @@ template <unsigned maxLen> inline uint64_t hashKey(Char<maxLen> x)
    // return result;
 }
 //---------------------------------------------------------------------------
-  template <typename T, typename F, unsigned I = 0, typename... Args>
-  constexpr inline T fold_tuple(const std::tuple<Args...>& tuple, T acc_or_init, const F& fn) {
+template <typename T, typename F, unsigned I = 0, typename... Args>
+constexpr inline T __fold_tuple(const std::tuple<Args...>& tuple, T acc_or_init, const F& fn) {
     if constexpr (I == sizeof...(Args)) {
-      return acc_or_init;
+        return acc_or_init;
     } else {
-      return fold_tuple<T, F, I + 1, Args...>(tuple, fn(acc_or_init, std::get<I>(tuple)), fn);
+        return __fold_tuple<T, F, I + 1, Args...>(tuple, fn(acc_or_init, std::get<I>(tuple)), fn);
     }
-  }
+}
 //---------------------------------------------------------------------------
 // extends hashKey function from Types.hpp to support tuples
 template<typename... Args> inline uint64_t hashKey(std::tuple<Args...> args) {
-  return fold_tuple(args, 0ul,
+  return __fold_tuple(args, 0ul,
     [](const uint64_t acc, const auto& val) -> uint64_t {
       return hashKey(val) ^ acc;
     });
