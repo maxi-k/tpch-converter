@@ -12,6 +12,7 @@ namespace tpch {
     struct TableDef {
         using import = TableImport<Ts...>;
         using reader = TableReader<Ts...>;
+        using columns = typename import::tuple_type;
     };
 
     /**
@@ -23,7 +24,8 @@ namespace tpch {
      * );
      **/
     using nation = TableDef<Integer, Char<25>, Integer, VarChar>;
-    [[maybe_unused]] constexpr std::array nation_c {"n_nationkey", "n_name", "n_regionkey", "n_comment"};
+    [[maybe_unused]] constexpr std::array nation_c { "n_nationkey", "n_name", "n_regionkey", "n_comment" };
+    enum nation_columns : uint8_t { n_nationkey, n_name, n_regionkey, n_comment };
 
     /**
      * CREATE TABLE CUSTOMER (
@@ -38,7 +40,8 @@ namespace tpch {
      * );
      **/
     using customer = TableDef<Integer, VarChar, VarChar, Integer, Char<15>, Numeric<15, 2>, Char<10>, VarChar>;
-    [[maybe_unused]] constexpr std::array customer_c {"c_custkey", "c_name", "c_address", "c_nationkey", "c_phone", "c_acctbal", "c_mktsegment", "c_comment"};
+    [[maybe_unused]] constexpr std::array customer_c { "c_custkey", "c_name", "c_address", "c_nationkey", "c_phone", "c_acctbal", "c_mktsegment", "c_comment" };
+    enum customer_columns { c_custkey, c_name, c_address, c_nationkey, c_phone, c_acctbal, c_mktsegment, c_comment };
 
     /**
      * CREATE TABLE LINEITEM (
@@ -61,7 +64,8 @@ namespace tpch {
      * );
      **/
     using lineitem = TableDef<Integer, Integer, Integer, Integer, Numeric<15, 2>, Numeric<15, 2>, Numeric<15, 2>, Numeric<15, 2>, Char<1>, Char<1>, Date, Date, Date, Char<25>, Char<10>, VarChar>;
-    [[maybe_unused]] constexpr std::array lineitem_c {"l_orderkey", "l_partkey", "l_suppkey", "l_linenumber", "l_quantity", "l_extendedprice", "l_discount", "l_tax", "l_returnflag", "l_linestatus", "l_shipdate", "l_commitdate", "l_receiptdate", "l_shipinstruct", "l_shipmode", "l_comment"};
+    [[maybe_unused]] constexpr std::array lineitem_c { "l_orderkey", "l_partkey", "l_suppkey", "l_linenumber", "l_quantity", "l_extendedprice", "l_discount", "l_tax", "l_returnflag", "l_linestatus", "l_shipdate", "l_commitdate", "l_receiptdate", "l_shipinstruct", "l_shipmode", "l_comment" };
+    enum lineitem_columns : uint8_t { l_orderkey, l_partkey, l_suppkey, l_linenumber, l_quantity, l_extendedprice, l_discount, l_tax, l_returnflag, l_linestatus, l_shipdate, l_commitdate, l_receiptdate, l_shipinstruct, l_shipmode, l_comment };
 
     /**
      * CREATE TABLE ORDERS (
@@ -77,7 +81,8 @@ namespace tpch {
      * );
      **/
     using orders = TableDef<Integer, Integer, Char<1>, Numeric<15, 2>, Date, Char<15>, Char<15>, Integer, VarChar>;
-    [[maybe_unused]] constexpr std::array orders_c {"o_orderkey", "o_custkey", "o_orderstatus", "o_totalprice", "o_orderdate", "o_orderpriority", "o_clerk", "o_shippriority", "o_comment"};
+    [[maybe_unused]] constexpr std::array orders_c { "o_orderkey", "o_custkey", "o_orderstatus", "o_totalprice", "o_orderdate", "o_orderpriority", "o_clerk", "o_shippriority", "o_comment" };
+    enum orders_columns : uint8_t { o_orderkey, o_custkey, o_orderstatus, o_totalprice, o_orderdate, o_orderpriority, o_clerk, o_shippriority, o_comment };
 
     /**
      *  CREATE TABLE PART (
@@ -94,6 +99,7 @@ namespace tpch {
      **/
     using part = TableDef<Integer, VarChar, Char<25>, Char<10>, VarChar, Integer, Char<10>, Numeric<15, 2>, VarChar>;
     [[maybe_unused]] constexpr std::array part_c { "p_partkey", "p_name", "p_mfgr", "p_brand", "p_type", "p_size", "p_container", "p_retailprice", "p_comment"};
+    enum part_columns : uint8_t { p_partkey, p_name, p_mfgr, p_brand, p_type, p_size, p_container, p_retailprice, p_comment};
 
     /**
      * CREATE TABLE PARTSUPP (
@@ -106,6 +112,7 @@ namespace tpch {
      **/
     using partsupp = TableDef<Integer, Integer, Integer, Numeric<15, 2>, VarChar>;
     [[maybe_unused]] constexpr std::array partsupp_c { "ps_partkey", "ps_suppkey", "ps_availqty", "ps_supplycost", "ps_comment"};
+    enum partsupp_columns : uint8_t { ps_partkey, ps_suppkey, ps_availqty, ps_supplycost, ps_comment};
     /**
      * CREATE TABLE REGION (
      *   R_REGIONKEY  INTEGER NOT NULL,
@@ -114,7 +121,8 @@ namespace tpch {
      * );
      **/
     using region = TableDef<Integer, Char<25>, VarChar>;
-    [[maybe_unused]] constexpr std::array region_c {"r_regionkey", "r_name", "r_comment"};
+    [[maybe_unused]] constexpr std::array region_c { "r_regionkey", "r_name", "r_comment" };
+    enum region_columns : uint8_t { r_regionkey, r_name, r_comment };
 
     /**
      * CREATE TABLE SUPPLIER (
@@ -128,5 +136,17 @@ namespace tpch {
      * );
      **/
     using supplier = TableDef<Integer, Char<25>, VarChar, Integer, Char<15>, Numeric<15, 2>, VarChar>;
-    [[maybe_unused]] constexpr std::array supplier_c {"s_suppkey", "s_name", "s_address", "s_nationkey", "s_phone", "s_acctbal", "s_comment"};
+    [[maybe_unused]] constexpr std::array supplier_c { "s_suppkey", "s_name", "s_address", "s_nationkey", "s_phone", "s_acctbal", "s_comment" };
+    enum supplier_columns : uint8_t { s_suppkey, s_name, s_address, s_nationkey, s_phone, s_acctbal, s_comment };
+
+    //
+    //
+    //
+    enum TPCH_TABLE : uint8_t   {   NATION,   CUSTOMER,   LINEITEM,   ORDERS,   PART,   PARTSUPP,   REGION,   SUPPLIER };
+    std::tuple TPCH_READERS   = { nation(), customer(), lineitem(), orders(), part(), partsupp(), region(), supplier() };
+    std::tuple TABLE_COLS     = { nation_c, customer_c, lineitem_c, orders_c, part_c, partsupp_c, region_c, supplier_c };
+    std::string TABLE_NAME[]  = { "nation", "customer", "lineitem", "orders", "part", "partsupp", "region", "supplier" };
+    char DBGEN_TARGET[]       = {      'n',        'c',        'L',      'O',    'P',        'S',      'r',        's' };
+
+    constexpr unsigned TABLE_COUNT = std::tuple_size_v<decltype(TPCH_READERS)>;
 } // namespace tpch
