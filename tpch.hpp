@@ -13,6 +13,9 @@ namespace tpch {
         using import = TableImport<Ts...>;
         using reader = TableReader<Ts...>;
         using columns = typename import::tuple_type;
+
+        template <template <typename> class Container>
+        using map_columns = std::tuple<Container<Ts>...>;
     };
 
     /**
