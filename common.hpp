@@ -81,6 +81,10 @@ struct TableImport {
       : outputs()
       , input(filename) {}
 
+  TableImport(size_t size)
+      : outputs()
+      , input(size) {}
+
   ~TableImport() {}
 
   inline unsigned read() {
