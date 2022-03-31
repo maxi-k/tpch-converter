@@ -7,6 +7,7 @@
 namespace tpch {
     using namespace types;
     using VarChar = std::string_view;
+    using Decimal = Numeric<12, 2>;
 
     template<typename... Ts>
     struct TableDef {
@@ -42,7 +43,7 @@ namespace tpch {
      *  C_COMMENT     VARCHAR(117) NOT NULL
      * );
      **/
-    using customer = TableDef<Integer, VarChar, VarChar, Integer, Char<15>, Numeric<15, 2>, Char<10>, VarChar>;
+    using customer = TableDef<Integer, VarChar, VarChar, Integer, Char<15>, Decimal, Char<10>, VarChar>;
     [[maybe_unused]] constexpr std::array customer_c { "c_custkey", "c_name", "c_address", "c_nationkey", "c_phone", "c_acctbal", "c_mktsegment", "c_comment" };
     enum customer_columns { c_custkey, c_name, c_address, c_nationkey, c_phone, c_acctbal, c_mktsegment, c_comment };
 
@@ -66,7 +67,7 @@ namespace tpch {
      *  L_COMMENT        VARCHAR(44) NOT NULL
      * );
      **/
-    using lineitem = TableDef<Integer, Integer, Integer, Integer, Numeric<15, 2>, Numeric<15, 2>, Numeric<15, 2>, Numeric<15, 2>, Char<1>, Char<1>, Date, Date, Date, Char<25>, Char<10>, VarChar>;
+    using lineitem = TableDef<Integer, Integer, Integer, Integer, Decimal, Decimal, Decimal, Decimal, Char<1>, Char<1>, Date, Date, Date, Char<25>, Char<10>, VarChar>;
     [[maybe_unused]] constexpr std::array lineitem_c { "l_orderkey", "l_partkey", "l_suppkey", "l_linenumber", "l_quantity", "l_extendedprice", "l_discount", "l_tax", "l_returnflag", "l_linestatus", "l_shipdate", "l_commitdate", "l_receiptdate", "l_shipinstruct", "l_shipmode", "l_comment" };
     enum lineitem_columns : uint8_t { l_orderkey, l_partkey, l_suppkey, l_linenumber, l_quantity, l_extendedprice, l_discount, l_tax, l_returnflag, l_linestatus, l_shipdate, l_commitdate, l_receiptdate, l_shipinstruct, l_shipmode, l_comment };
 
@@ -83,7 +84,7 @@ namespace tpch {
      *  O_COMMENT        VARCHAR(79) NOT NULL
      * );
      **/
-    using orders = TableDef<Integer, Integer, Char<1>, Numeric<15, 2>, Date, Char<15>, Char<15>, Integer, VarChar>;
+    using orders = TableDef<Integer, Integer, Char<1>, Decimal, Date, Char<15>, Char<15>, Integer, VarChar>;
     [[maybe_unused]] constexpr std::array orders_c { "o_orderkey", "o_custkey", "o_orderstatus", "o_totalprice", "o_orderdate", "o_orderpriority", "o_clerk", "o_shippriority", "o_comment" };
     enum orders_columns : uint8_t { o_orderkey, o_custkey, o_orderstatus, o_totalprice, o_orderdate, o_orderpriority, o_clerk, o_shippriority, o_comment };
 
@@ -100,7 +101,7 @@ namespace tpch {
      *   P_COMMENT     VARCHAR(23) NOT NULL
      * );
      **/
-    using part = TableDef<Integer, VarChar, Char<25>, Char<10>, VarChar, Integer, Char<10>, Numeric<15, 2>, VarChar>;
+    using part = TableDef<Integer, VarChar, Char<25>, Char<10>, VarChar, Integer, Char<10>, Decimal, VarChar>;
     [[maybe_unused]] constexpr std::array part_c { "p_partkey", "p_name", "p_mfgr", "p_brand", "p_type", "p_size", "p_container", "p_retailprice", "p_comment"};
     enum part_columns : uint8_t { p_partkey, p_name, p_mfgr, p_brand, p_type, p_size, p_container, p_retailprice, p_comment};
 
@@ -113,7 +114,7 @@ namespace tpch {
      *  PS_COMMENT     VARCHAR(199) NOT NULL
      * );
      **/
-    using partsupp = TableDef<Integer, Integer, Integer, Numeric<15, 2>, VarChar>;
+    using partsupp = TableDef<Integer, Integer, Integer, Decimal, VarChar>;
     [[maybe_unused]] constexpr std::array partsupp_c { "ps_partkey", "ps_suppkey", "ps_availqty", "ps_supplycost", "ps_comment"};
     enum partsupp_columns : uint8_t { ps_partkey, ps_suppkey, ps_availqty, ps_supplycost, ps_comment};
     /**
@@ -138,7 +139,7 @@ namespace tpch {
      *  S_COMMENT     VARCHAR(101) NOT NULL
      * );
      **/
-    using supplier = TableDef<Integer, Char<25>, VarChar, Integer, Char<15>, Numeric<15, 2>, VarChar>;
+    using supplier = TableDef<Integer, Char<25>, VarChar, Integer, Char<15>, Decimal, VarChar>;
     [[maybe_unused]] constexpr std::array supplier_c { "s_suppkey", "s_name", "s_address", "s_nationkey", "s_phone", "s_acctbal", "s_comment" };
     enum supplier_columns : uint8_t { s_suppkey, s_name, s_address, s_nationkey, s_phone, s_acctbal, s_comment };
 
