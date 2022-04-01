@@ -7,6 +7,7 @@
 #include <tuple>
 #include <atomic>
 #include <ostream>
+#include <algorithm>
 #ifdef __SSE4_2__
 #include <nmmintrin.h>
 #endif
@@ -18,7 +19,7 @@
 namespace types {
 //---------------------------------------------------------------------------
 namespace {
-    const char* memmemSSE(const char* haystack, size_t len, const char* needleStr,
+    [[maybe_unused]] const char* memmemSSE(const char* haystack, size_t len, const char* needleStr,
                           size_t needleLength) {
 #ifdef __SSE4_2__
         if (len < 16 || needleLength > 16)
@@ -190,9 +191,12 @@ template <unsigned maxLen> class Varchar
 {
 
 public:
+   using length_t = typename LengthIndicator<maxLen>::type;
    static constexpr TypeTag TAG = VARCHAR;
+   static constexpr unsigned MAX_LEN = maxLen;
+
    /// The length
-   typename LengthIndicator<maxLen>::type len;
+   length_t len;
    /// The value
    char value[maxLen];
 
@@ -261,7 +265,7 @@ template <unsigned maxLen> uint64_t Varchar<maxLen>::hash() const
 template <unsigned maxLen> bool Varchar<maxLen>::operator<(const Varchar& other) const
 // Comparison
 {
-   int c=memcmp(value,other.value,min(len,other.len));
+   int c=memcmp(value,other.value,std::min(len,other.len));
    if (c<0) return true;
    if (c>0) return false;
    return len<other.len;
@@ -279,10 +283,11 @@ template <unsigned maxLen> std::ostream& operator<<(std::ostream& out,const Varc
 template <unsigned maxLen> class Char
 {
 public:
+   using length_t = typename LengthIndicator<maxLen>::type;
    static constexpr TypeTag TAG = CHAR;
    static constexpr unsigned MAX_LEN = maxLen;
    /// The length
-   typename LengthIndicator<maxLen>::type len;
+   length_t len;
    /// The data
    char value[maxLen];
 
@@ -349,7 +354,7 @@ template <unsigned maxLen> uint64_t Char<maxLen>::hash() const
 template <unsigned maxLen> bool Char<maxLen>::operator<(const Char& other) const
 // Comparison
 {
-   int c=memcmp(value,other.value,min(len,other.len));
+   int c=memcmp(value,other.value,std::min(len,other.len));
    if (c<0) return true;
    if (c>0) return false;
    return len<other.len;
@@ -358,7 +363,7 @@ template <unsigned maxLen> bool Char<maxLen>::operator<(const Char& other) const
 template <unsigned maxLen> bool Char<maxLen>::operator>(const Char& other) const
 // Comparison
 {
-   int c=memcmp(value,other.value,min(len,other.len));
+   int c=memcmp(value,other.value,std::min(len,other.len));
    if (c<0) return false;
    if (c>0) return true;
    return len>other.len;
@@ -720,7 +725,7 @@ class Date
        return d;
    }
 
-   Integer extractYear(const Date& d) {
+   static Integer extractYear(const Date& d) {
        unsigned year, month, day;
        splitJulianDay(d.value, year, month, day);
        Integer r(year);
