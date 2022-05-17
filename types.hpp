@@ -8,6 +8,7 @@
 #include <atomic>
 #include <ostream>
 #include <algorithm>
+#include <limits>
 #ifdef __SSE4_2__
 #include <nmmintrin.h>
 #endif
@@ -96,8 +97,95 @@ inline constexpr uint64_t murmurHash64(uint64_t k) {
     return h;
 }
 //---------------------------------------------------------------------------
-enum TypeTag : uint8_t               {   INTEGER,   NUMERIC,   CHAR,   VARCHAR,   DATE,   TIMESTAMP };
-constexpr char const* TYPE_NAMES[] = { "integer", "numeric", "char", "varchar", "date", "timestamp" };
+enum TypeTag : uint8_t               {   INTEGER,   NUMERIC,   CHAR,   VARCHAR,   DATE,   TIMESTAMP, BIGINT   };
+constexpr char const* TYPE_NAMES[] = { "integer", "numeric", "char", "varchar", "date", "timestamp", "bigint" };
+//---------------------------------------------------------------------------
+/// BigInt Class
+class BigInt
+{
+public:
+   static constexpr TypeTag TAG = BIGINT;
+   int64_t value;
+
+   BigInt() {}
+   BigInt(int64_t value) : value(value) {}
+
+   /// Hash
+   inline uint64_t hash() const;
+   /// Comparison
+   inline bool operator==(const BigInt& n) const { return value==n.value; }
+   /// Comparison
+   inline bool operator!=(const BigInt& n) const { return value!=n.value; }
+   /// Comparison
+   inline bool operator<(const BigInt& n) const { return value<n.value; }
+   /// Comparison
+   inline bool operator<=(const BigInt& n) const { return value<=n.value; }
+   /// Comparison
+   inline bool operator>(const BigInt& n) const { return value>n.value; }
+   /// Comparison
+   inline bool operator>=(const BigInt& n) const { return value>=n.value; }
+   /// Add
+   inline BigInt operator+(const BigInt& n) const { BigInt r; r.value=value+n.value; return r; }
+   /// Add
+   inline BigInt& operator+=(const BigInt& n) { value+=n.value; return *this; }
+   /// Sub
+   inline BigInt operator-(const BigInt& n) const { BigInt r; r.value=value-n.value; return r; }
+   /// Mul
+   inline BigInt operator*(const BigInt& n) const { BigInt r; r.value=value*n.value; return r; }
+   /// Cast
+   static BigInt castString(const char* str, uint32_t strLen) {
+       auto iter = str, limit = str + strLen;
+
+       // Trim WS
+       while ((iter != limit) && ((*iter) == ' ')) ++iter;
+       while ((iter != limit) && ((*(limit - 1)) == ' ')) --limit;
+
+       // Check for a sign
+       bool neg = false;
+       if (iter != limit) {
+           if ((*iter) == '-') {
+               neg = true;
+               ++iter;
+           } else if ((*iter) == '+') {
+               ++iter;
+           }
+       }
+
+       // Parse
+       if (iter == limit) throw "invalid number format: found non-integer characters";
+
+       uint64_t result = 0;
+       unsigned digitsSeen = 0;
+       for (; iter != limit; ++iter) {
+           char c = *iter;
+           if ((c >= '0') && (c <= '9')) {
+               result = (result * 10) + (c - '0');
+               ++digitsSeen;
+           } else if (c == '.') {
+               break;
+           } else {
+               throw "invalid number format: invalid character in integer string";
+           }
+       }
+
+       if (digitsSeen > 20 || result > std::numeric_limits<int64_t>::max())
+           throw "invalid number format: too many characters (64bit integers can at most consist of 20 numeric characters)";
+
+       BigInt r;
+       r.value = neg ? -result : result;
+       return r;
+   }
+   // output
+   friend std::ostream& operator<<(std::ostream& out, const BigInt& value) {
+       out << value.value;
+       return out;
+   }
+};
+//---------------------------------------------------------------------------
+inline BigInt modulo(BigInt x,int64_t y)
+{
+   return BigInt(x.value%y);
+}
 //---------------------------------------------------------------------------
 /// Integer class
 class Integer
@@ -131,6 +219,8 @@ public:
    inline Integer operator-(const Integer& n) const { Integer r; r.value=value-n.value; return r; }
    /// Mul
    inline Integer operator*(const Integer& n) const { Integer r; r.value=value*n.value; return r; }
+   /// Conversion to BigInt for comparisons
+   inline operator BigInt() const { return BigInt(value); }
    /// Cast
    static Integer castString(const char* str, uint32_t strLen) {
        auto iter = str, limit = str + strLen;
@@ -167,7 +257,7 @@ public:
            }
        }
 
-       if (digitsSeen > 10)
+       if (digitsSeen > 10 || result > std::numeric_limits<int32_t>::max())
            throw "invalid number format: too many characters (32bit integers can at most consist of 10 numeric characters)";
 
        Integer r;
