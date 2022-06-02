@@ -564,7 +564,12 @@ public:
    /// Add
    Numeric operator+(const Numeric<len,precision>& n) const { Numeric r; r.value=value+n.value; return r; }
    /// Add
-   Numeric& operator+=(const Numeric<len,precision>& n) { value+=n.value; return *this; }
+   Numeric& operator+=(const Numeric<len,precision>& n) {
+       __int128_t result = value + n.value;
+       assert(result <= std::numeric_limits<int64_t>::max());
+       value = result;
+       return *this;
+   }
    /// Sub
    Numeric operator-(const Numeric<len,precision>& n) const { Numeric r; r.value=value-n.value; return r; }
    /// Div
@@ -572,13 +577,17 @@ public:
    /// Div
    template <unsigned l> Numeric<len,precision> operator/(const Numeric<l,0>& n) const { Numeric r; r.value=value/n.value; return r; }
    /// Div
-   template <unsigned l> Numeric<len,precision> operator/(const Numeric<l,1>& n) const { Numeric r; r.value=value*10/n.value; return r; }
+   template <unsigned l> Numeric<len,precision> operator/(const Numeric<l,1>& n) const { return divSafe<l, 1, 10>(n); }
    /// Div
-   template <unsigned l> Numeric<len,precision> operator/(const Numeric<l,2>& n) const { Numeric r; r.value=value*100/n.value; return r; }
+   template <unsigned l> Numeric<len,precision> operator/(const Numeric<l,2>& n) const { return divSafe<l, 2, 100>(n); }
    /// Div
-   template <unsigned l> Numeric<len,precision> operator/(const Numeric<l,4>& n) const { Numeric r; r.value=value*10000/n.value; return r; }
+   template <unsigned l> Numeric<len,precision> operator/(const Numeric<l,4>& n) const { return divSafe<l, 4, 10000>(n); }
    /// Mul
-   Numeric<len,precision+precision> operator*(const Numeric<len,precision>& n) const { Numeric<len,precision+precision> r; r.value=value*n.value; return r; }
+   Numeric<len,precision+precision> operator*(const Numeric<len,precision>& n) const {
+       Numeric<len,precision+precision> r;
+       r.value=value*n.value;
+       return r;
+   }
    /// Neg
    Numeric operator-() { Numeric n; n.value=-value; return n; }
 
@@ -594,6 +603,16 @@ public:
    template <unsigned l> Numeric<l,precision-2> castM2() const { Numeric<l,precision-2> r; r.value=value/100; return r; }
    /// Build a number
    static Numeric<len,precision> buildRaw(long v) { Numeric r; r.value=v; return r; }
+   /// division helper with overflow check for intermediary result
+   template<unsigned l, unsigned p, unsigned mul>
+   inline Numeric<l,p> divSafe(const Numeric<l, p>& n) const {
+       Numeric<l,p> r;
+       __int128_t interm = value;
+       interm *= mul; interm /= n.value;
+       assert(interm <= std::numeric_limits<int64_t>::max());
+       r.value = interm;
+       return r;
+   }
    /// Cast
    static Numeric<len,precision> castString(const char* str,uint32_t strLen) {
       auto iter=str,limit=str+strLen;
