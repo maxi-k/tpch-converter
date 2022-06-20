@@ -565,8 +565,9 @@ public:
    Numeric operator+(const Numeric<len,precision>& n) const { Numeric r; r.value=value+n.value; return r; }
    /// Add
    Numeric& operator+=(const Numeric<len,precision>& n) {
-       __int128_t result = value + n.value;
-       assert(result <= std::numeric_limits<int64_t>::max());
+       __int128_t result = value;
+       result += n.value;
+       assert(result <= ((__int128_t) std::numeric_limits<int64_t>::max()));
        value = result;
        return *this;
    }
@@ -609,7 +610,7 @@ public:
        Numeric<l,p> r;
        __int128_t interm = value;
        interm *= mul; interm /= n.value;
-       assert(interm <= std::numeric_limits<int64_t>::max());
+       assert(interm <= ((__int128_t) std::numeric_limits<int64_t>::max()));
        r.value = interm;
        return r;
    }
