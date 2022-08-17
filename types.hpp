@@ -925,7 +925,17 @@ template<class T1,class T2,class T3> inline uint64_t hashKey(T1 x,T2 y,T3 z) {
    return (r^=(r<<17));
 }
 */
-
+//---------------------------------------------------------------------------
+uint64_t BigInt::hash() const
+// Hash
+{
+   return murmurHash64(value);
+   // original
+   // uint64_t r=88172645463325252ull^value;
+   // r^=(r<<13);
+   // r^=(r>>7);
+   // return (r^=(r<<17));
+}
 //---------------------------------------------------------------------------
 uint64_t Integer::hash() const
 // Hash

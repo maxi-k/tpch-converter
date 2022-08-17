@@ -66,7 +66,7 @@ namespace tpch {
      *  L_COMMENT        VARCHAR(44) NOT NULL
      * );
      **/
-    using lineitem = TableDef<Integer, Integer, Integer, Integer, Decimal, Decimal, Decimal, Decimal, Char<1>, Char<1>, Date, Date, Date, Char<25>, Char<10>, Varchar<44>>;
+    using lineitem = TableDef<BigInt, Integer, Integer, Integer, Decimal, Decimal, Decimal, Decimal, Char<1>, Char<1>, Date, Date, Date, Char<25>, Char<10>, Varchar<44>>;
     [[maybe_unused]] constexpr std::array lineitem_c { "l_orderkey", "l_partkey", "l_suppkey", "l_linenumber", "l_quantity", "l_extendedprice", "l_discount", "l_tax", "l_returnflag", "l_linestatus", "l_shipdate", "l_commitdate", "l_receiptdate", "l_shipinstruct", "l_shipmode", "l_comment" };
     enum lineitem_columns : uint8_t { l_orderkey, l_partkey, l_suppkey, l_linenumber, l_quantity, l_extendedprice, l_discount, l_tax, l_returnflag, l_linestatus, l_shipdate, l_commitdate, l_receiptdate, l_shipinstruct, l_shipmode, l_comment };
 
@@ -83,7 +83,7 @@ namespace tpch {
      *  O_COMMENT        VARCHAR(79) NOT NULL
      * );
      **/
-    using orders = TableDef<Integer, Integer, Char<1>, Decimal, Date, Char<15>, Char<15>, Integer, Varchar<79>>;
+    using orders = TableDef<BigInt, Integer, Char<1>, Decimal, Date, Char<15>, Char<15>, Integer, Varchar<79>>;
     [[maybe_unused]] constexpr std::array orders_c { "o_orderkey", "o_custkey", "o_orderstatus", "o_totalprice", "o_orderdate", "o_orderpriority", "o_clerk", "o_shippriority", "o_comment" };
     enum orders_columns : uint8_t { o_orderkey, o_custkey, o_orderstatus, o_totalprice, o_orderdate, o_orderpriority, o_clerk, o_shippriority, o_comment };
 
