@@ -533,19 +533,18 @@ public:
    static constexpr unsigned LENGTH = len;
    static constexpr unsigned PRECISION = precision;
    /// The value
-   int64_t value;
+   double value;
 
    template <unsigned l, unsigned p>
    friend class Numeric;
 
    Numeric() : value(0) {}
-   Numeric(Integer x) : value(x.value*numericShifts[precision]) {}
-   Numeric(int64_t x) : value(x) {}
+   Numeric(double x) : value(x) {}
 
    /// Assign a value
-   void assignRaw(long v) { value=v; }
+   void assignRaw(double v) { value=v; }
    /// Get the value
-   long getRaw() const { return value; }
+   double getRaw() const { return value; }
 
    /// Hash
    inline uint64_t hash() const;
@@ -565,11 +564,8 @@ public:
    Numeric operator+(const Numeric<len,precision>& n) const { Numeric r; r.value=value+n.value; return r; }
    /// Add
    Numeric& operator+=(const Numeric<len,precision>& n) {
-       __int128_t result = value;
-       result += n.value;
-       assert(result <= ((__int128_t) std::numeric_limits<int64_t>::max()));
-       value = result;
-       return *this;
+     value += n.value;
+     return *this;
    }
    /// Sub
    Numeric operator-(const Numeric<len,precision>& n) const { Numeric r; r.value=value-n.value; return r; }
@@ -594,24 +590,13 @@ public:
 
    /// Cast
    template <unsigned l> Numeric<l,precision> castS() const { Numeric<l,precision> r; r.value=value; return r; }
-   /// Cast
-   template <unsigned l> Numeric<l,precision+1> castP1() const { Numeric<l,precision+1> r; r.value=value*10; return r; }
-   /// Cast
-   Numeric<len,precision+2> castP2() const { Numeric<len,precision+2> r; r.value=value*100; return r; }
-   /// Cast
-   template <unsigned l> Numeric<l,precision-1> castM1() const { Numeric<l,precision-1> r; r.value=value/10; return r; }
-   /// Cast
-   template <unsigned l> Numeric<l,precision-2> castM2() const { Numeric<l,precision-2> r; r.value=value/100; return r; }
    /// Build a number
-   static Numeric<len,precision> buildRaw(long v) { Numeric r; r.value=v; return r; }
+   static Numeric<len,precision> buildRaw(double v) { Numeric r; r.value=v; return r; }
    /// division helper with overflow check for intermediary result
    template<unsigned l, unsigned p, unsigned mul>
    inline Numeric<l,p> divSafe(const Numeric<l, p>& n) const {
        Numeric<l,p> r;
-       __int128_t interm = value;
-       interm *= mul; interm /= n.value;
-       assert(interm <= ((__int128_t) std::numeric_limits<int64_t>::max()));
-       r.value = interm;
+       r.value = this->value / n.value;
        return r;
    }
    /// Cast
@@ -622,61 +607,17 @@ public:
       while ((iter!=limit)&&((*iter)==' ')) ++iter;
       while ((iter!=limit)&&((*(limit-1))==' ')) --limit;
 
-      // Check for a sign
-      bool neg=false;
-      if (iter!=limit) {
-         if ((*iter)=='-') {
-            neg=true;
-            ++iter;
-         } else if ((*iter)=='+') {
-            ++iter;
-         }
-      }
-
-      // Parse
-      if (iter==limit)
-         throw "invalid number format: found non-numeric characters";
-
-      int64_t result=0;
-      bool fraction=false;
-      unsigned digitsSeen=0;
-      unsigned digitsSeenFraction=0;
-      for (;iter!=limit;++iter) {
-         char c=*iter;
-         if ((c>='0')&&(c<='9')) {
-            if (fraction) {
-               result=(result*10)+(c-'0');
-               ++digitsSeenFraction;
-            } else {
-               ++digitsSeen;
-               result=(result*10)+(c-'0');
-            }
-         } else if (c=='.') {
-            if (fraction)
-               throw "invalid number format: already in fraction";
-            while ((iter!=limit)&&((*(limit-1))=='0')) --limit; // skip trailing 0s
-            fraction=true;
-         } else {
-            throw "invalid number format: invalid character in numeric string";
-         }
-      }
-
-      if ((digitsSeen>18/*(len-precision)*/)||(digitsSeenFraction>precision))
-         throw "invalid number format: loosing precision";
-
-      result*=numericShifts[precision-digitsSeenFraction];
-      if (neg) {
-         return buildRaw(-result);
-      } else {
-         return buildRaw(result);
-      }
+      char* end;
+      double parsed = std::strtod(iter,&end);
+      assert(end == limit);
+      return buildRaw(parsed);
    }
 };
 //---------------------------------------------------------------------------
 template <unsigned len,unsigned precision> uint64_t Numeric<len,precision>::hash() const
 // Hash
 {
-   uint64_t r=88172645463325252ull^value;
+   uint64_t r=88172645463325252ull^*reinterpret_cast<const uint64_t*>(&value);
    return murmurHash64(r);
    // original
    // uint64_t r=88172645463325252ull^value;
